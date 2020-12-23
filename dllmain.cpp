@@ -29,11 +29,13 @@ void hProcessEvent(UFT::UObject* Object, UFT::UFunction* Function, void* Params)
     else if (strcmp(Function->GetFullName().c_str(), "Function BP_AGCharacter.BP_AGCharacter_C.SetupPlayerCard") == 0)
     {
         // Send the server a fake username when the match starts so it's hard for people to report you
+	// This is patched as of 2020-12-22
         if (AG::GetPC())
             AG::GetPC()->ServerChangeName(UFT::FString{ funcs::random_name().c_str() });
     }
     else if (strcmp(Function->GetFullName().c_str(), "Function AimGods.AGWeapon.ServerNotifyHit") == 0)
     {
+	// This is patched as of 2020-12-22
         auto Args = (UFT::AAGWeapon_ServerNotifyHit_Params*)Params;
         for (auto i = 0; i < 50; i++) {
             rProcessEvent(Object, Function, Params);
@@ -78,9 +80,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 		freopen_s(&file, "CONOUT$", "w", stdout);
 		ShowWindow(GetConsoleWindow(), SW_SHOW);
 
-        rRequestExit = (tRequestExit)funcs::FindPattern(GetModuleHandleW(nullptr), reinterpret_cast<const unsigned char*>("\x48\x83\xEC\x28\x84\xC9\x74\x07"), "xxxxxxxx");
-        rProcessEvent = (tProcessEvent)funcs::FindPattern(GetModuleHandleW(nullptr), reinterpret_cast<const unsigned char*>("\x40\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xEC\xF0\x00\x00\x00\x00"), "xxxxxxxxxxxxxxxx????");
-
+	rRequestExit = reinterpret_cast<tRequestExit>(reinterpret_cast<unsigned char*>(GetModuleHandleW(nullptr)) + 0x07C08F0);
+        //rRequestExit = (tRequestExit)funcs::FindPattern(GetModuleHandleW(nullptr), reinterpret_cast<const unsigned char*>("\x48\x83\xEC\x28\x84\xC9\x74\x07"), "xxxxxxxx");
+        //rProcessEvent = (tProcessEvent)funcs::FindPattern(GetModuleHandleW(nullptr), reinterpret_cast<const unsigned char*>("\x40\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x81\xEC\xF0\x00\x00\x00\x00"), "xxxxxxxxxxxxxxxx????");
+	rProcessEvent = reinterpret_cast<tProcessEvent>(reinterpret_cast<unsigned char*>(GetModuleHandleW(nullptr)) + 0x0A64300);
+		
         UFT::InitSdk();
         
         SetupKeybinds();
